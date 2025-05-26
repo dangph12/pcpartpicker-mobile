@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 import React, { useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
@@ -15,6 +16,8 @@ const Auth = () => {
       password: password,
     });
     if (error) {
+      console.log(email, password);
+      console.error('Error signing in:', error);
       Alert.alert(error.message);
     }
     setLoading(false);
@@ -34,15 +37,6 @@ const Auth = () => {
     }
     if (!session) {
       Alert.alert('Please check your email for the confirmation link');
-    }
-    setLoading(false);
-  };
-
-  const signOut = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      Alert.alert(error.message);
     }
     setLoading(false);
   };
@@ -78,11 +72,6 @@ const Auth = () => {
       <View style={styles.verticallySpaced}>
         <Button disabled={loading} onPress={() => signUpWithEmail()}>
           Sign up
-        </Button>
-      </View>
-      <View style={styles.verticallySpaced}>
-        <Button disabled={loading} onPress={() => signOut()}>
-          Sign out
         </Button>
       </View>
     </View>

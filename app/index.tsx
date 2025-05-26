@@ -1,7 +1,9 @@
+/* eslint-disable import/no-unresolved */
 import { Session } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import 'react-native-url-polyfill/auto';
+import Account from '~/components/Account';
 import Auth from '~/components/Auth';
 import { supabase } from '~/lib/subpabase';
 
@@ -23,8 +25,7 @@ export default function Index() {
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-      <Auth />
-      {session && session.user && <Text>{session.user.id}</Text>}
+      {session ? <Account key={session.user.id} session={session} /> : <Auth />}
     </View>
   );
 }
