@@ -8,6 +8,9 @@ const Index = () => {
       <Button mode="contained" onPress={() => router.push('/login')}>
         Go to Login
       </Button>
+      <Button mode="contained" onPress={() => router.push('/register')}>
+        Go to Register
+      </Button>
       <Button mode="contained" onPress={() => router.push('/profile')}>
         Go to Profile
       </Button>
