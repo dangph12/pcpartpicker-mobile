@@ -9,13 +9,7 @@ import {
   View,
 } from 'react-native';
 import { supabase } from '~/lib/subpabase';
-
-interface Product {
-  id: string;
-  name: string;
-  image_url: string;
-  price: string;
-}
+import Product from '~/types/Product';
 
 export default function SearchScreen() {
   const [products, setProducts] = useState<Product[]>([]);

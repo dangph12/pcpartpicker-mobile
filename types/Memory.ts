@@ -1,0 +1,22 @@
+create table public.memory_detailed (
+  id uuid not null default gen_random_uuid (),
+  name text null,
+  image_url text null,
+  product_url text null,
+  price text null,
+  manufacturer text null,
+  part text null,
+  speed text null,
+  form_factor text null,
+  modules text null,
+  price_over_gb text null,
+  color text null,
+  first_word_latency text null,
+  cas_latency bigint null,
+  voltage text null,
+  timing text null,
+  ecc_over_registered text null,
+  heat_spreader text null,
+  specs_number bigint null,
+  constraint memory_detailed_pkey primary key (id)
+) TABLESPACE pg_default;
