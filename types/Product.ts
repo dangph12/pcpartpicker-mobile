@@ -3,4 +3,5 @@ export default interface Product {
   name: string;
   image_url: string;
   price: string;
+  manufacturer: string;
 }

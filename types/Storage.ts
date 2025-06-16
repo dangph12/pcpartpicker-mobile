@@ -1,10 +1,4 @@
 create table public.storage_detailed (
-  id uuid not null default gen_random_uuid (),
-  name text null,
-  image_url text null,
-  product_url text null,
-  price text null,
-  manufacturer text null,
   part text null,
   capacity text null,
   price_over_gb text null,

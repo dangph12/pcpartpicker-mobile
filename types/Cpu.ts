@@ -1,6 +1,5 @@
 import Product from './Product';
 export default interface Cpu extends Product {
-  manufacturer: string;
   part: string;
   series: string;
   microarchitecture: string;

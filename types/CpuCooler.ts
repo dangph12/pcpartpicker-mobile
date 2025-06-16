@@ -1,7 +1,6 @@
 import Product from './Product';
 
 export default interface CpuCooler extends Product {
-  manufacturer: string;
   model: string;
   part: string;
   fanRpm: string;

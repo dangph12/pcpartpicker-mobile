@@ -1,6 +1,5 @@
 import Product from './Product';
 export default interface Case extends Product {
-  manufacturer: string;
   part: string;
   type: string;
   color: string;

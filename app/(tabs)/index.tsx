@@ -1,21 +1,13 @@
-import { router } from 'expo-router';
+/* eslint-disable import/no-unresolved */
+import React from 'react';
 import { View } from 'react-native';
-import { Button } from 'react-native-paper';
+import ProductList from '~/components/ProductList';
 
-const Index = () => {
+export default function SearchScreen() {
   return (
     <View>
-      <Button mode="contained" onPress={() => router.push('/login')}>
-        Go to Login
-      </Button>
-      <Button mode="contained" onPress={() => router.push('/register')}>
-        Go to Register
-      </Button>
-      <Button mode="contained" onPress={() => router.push('/profile')}>
-        Go to Profile
-      </Button>
+      <ProductList tableSource="cases_detailed" />
+      <ProductList tableSource="cpus_detailed" />
     </View>
   );
-};
-
-export default Index;
+}

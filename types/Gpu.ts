@@ -1,10 +1,6 @@
-create table public.gpus_detailed (
-  id uuid not null default gen_random_uuid (),
-  name text null,
-  image_url text null,
-  product_url text null,
-  price text null,
-  manufacturer text null,
+import Product from './Product';
+
+export default interface Gpu extends Product {
   part text null,
   chipset text null,
   memory text null,
@@ -29,5 +25,4 @@ create table public.gpus_detailed (
   display_port_1_4a_outputs text null,
   display_port_2_1_outputs text null,
   sli_cross_fire text null,
-  constraint gpus_detailed_pkey primary key (id)
-) TABLESPACE pg_default;
+}
