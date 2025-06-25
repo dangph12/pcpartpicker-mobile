@@ -1,13 +1,18 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { DrawerToggleButton } from '@react-navigation/drawer';
 import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: 'blue' }}>
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: 'blue',
+        headerLeft: () => <DrawerToggleButton />,
+      }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: '',
+          title: 'Home',
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="home" color={color} />
           ),
@@ -16,27 +21,18 @@ export default function TabLayout() {
       <Tabs.Screen
         name="search"
         options={{
-          title: '',
+          title: 'Search',
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="search" color={color} />
           ),
         }}
-      />
+      />{' '}
       <Tabs.Screen
         name="builder"
         options={{
-          title: '',
+          title: 'Builder',
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="wrench" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: '',
-          tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="user" color={color} />
           ),
         }}
       />
