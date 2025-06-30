@@ -29,7 +29,7 @@ const LoginForm = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View>
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <TextInput
           label="Email"
@@ -53,12 +53,7 @@ const LoginForm = () => {
       </View>
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button disabled={loading} onPress={() => signInWithEmail()}>
-          Sign in
-        </Button>
-      </View>
-      <View style={styles.verticallySpaced}>
-        <Button disabled={loading} onPress={() => signUpWithEmail()}>
-          Sign up
+          Login
         </Button>
       </View>
     </View>
@@ -66,10 +61,6 @@ const LoginForm = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 40,
-    padding: 12,
-  },
   verticallySpaced: {
     paddingTop: 4,
     paddingBottom: 4,
