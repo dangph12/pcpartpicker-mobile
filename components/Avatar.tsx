@@ -1,7 +1,7 @@
 /* eslint-disable import/no-unresolved */
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
-import { Alert, Image, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { Button } from 'react-native-paper';
 import { supabase } from '~/lib/subpabase';
 
@@ -27,14 +27,15 @@ const Avatar = ({ url, size = 150, onUpload }: AvatarProps) => {
       const { data, error } = await supabase.storage
         .from('avatars')
         .download(path);
+
       if (error) {
         throw error;
       }
-      const fr = new FileReader();
-      fr.readAsDataURL(data);
-      fr.onload = () => {
-        setAvatarUrl(fr.result as string);
-      };
+
+      if (data) {
+        const url = URL.createObjectURL(data);
+        setAvatarUrl(url);
+      }
     } catch (error) {
       if (error instanceof Error) {
         console.warn('Error downloading image: ', error.message);
@@ -45,46 +46,50 @@ const Avatar = ({ url, size = 150, onUpload }: AvatarProps) => {
   const uploadAvatar = async () => {
     try {
       setUploading(true);
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         allowsMultipleSelection: false,
         allowsEditing: true,
-        quality: 1,
-        exif: false,
+        quality: 0.8,
+        base64: true,
       });
+
       if (result.canceled || !result.assets || result.assets.length === 0) {
-        console.log('User cancelled image picker');
         return;
       }
-      const image = result.assets[0];
-      if (!image.uri) {
-        throw new Error('No image uri!');
-      }
-      const arraybuffer = await fetch(image.uri).then((res) =>
-        res.arrayBuffer()
-      );
 
-      const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg';
-      const path = `${Date.now()}.${fileExt}`;
-      const { data, error: uploadError } = await supabase.storage
+      const img = result.assets[0];
+      const response = await fetch(img.uri);
+      const arrayBuffer = await response.arrayBuffer();
+      const fileExt = img.mimeType?.split('/')[1] || 'jpeg';
+
+      const { data, error } = await supabase.storage
         .from('avatars')
-        .upload(path, arraybuffer, {
-          contentType: image.mimeType ?? 'image/jpeg',
+        .upload(`${Date.now()}.${fileExt}`, arrayBuffer, {
+          contentType: img.mimeType || 'image/jpeg',
+          cacheControl: '3600',
+          upsert: false,
         });
-      if (uploadError) {
-        throw uploadError;
+
+      if (error) {
+        throw error;
       }
-      onUpload(data.path);
+
+      if (data) {
+        onUpload(data.path);
+      }
     } catch (error) {
       if (error instanceof Error) {
-        Alert.alert(error.message);
+        console.warn('Error uploading image: ', error.message);
       } else {
-        throw error;
+        console.warn('Error uploading image: ', error);
       }
     } finally {
       setUploading(false);
     }
   };
+
   return (
     <View>
       {avatarUrl ? (

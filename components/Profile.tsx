@@ -9,7 +9,6 @@ import Avatar from './Avatar';
 export default function Profile({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('');
-  const [website, setWebsite] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
 
   useEffect(() => {
@@ -19,7 +18,7 @@ export default function Profile({ session }: { session: Session }) {
       const { user } = session;
       const { data, error } = await supabase
         .from('profiles')
-        .select(`username, website, avatar_url`)
+        .select(`username, avatar_url`)
         .eq('id', user.id)
         .single();
 
@@ -28,7 +27,6 @@ export default function Profile({ session }: { session: Session }) {
           console.warn(error);
         } else if (data) {
           setUsername(data.username || '');
-          setWebsite(data.website || '');
           setAvatarUrl(data.avatar_url || '');
         }
       }
@@ -41,11 +39,9 @@ export default function Profile({ session }: { session: Session }) {
   }, [session]);
   const updateProfile = async ({
     username,
-    website,
     avatarUrl,
   }: {
     username: string;
-    website: string;
     avatarUrl: string;
   }) => {
     try {
@@ -56,7 +52,6 @@ export default function Profile({ session }: { session: Session }) {
       const updates = {
         id: session.user.id,
         username,
-        website,
         avatar_url: avatarUrl,
         updated_at: new Date(),
       };
@@ -82,13 +77,13 @@ export default function Profile({ session }: { session: Session }) {
   };
   return (
     <View style={styles.container}>
-      <View>
+      <View style={{ alignItems: 'center', marginBottom: 20 }}>
         <Avatar
           size={200}
           url={avatarUrl}
           onUpload={(url: string) => {
             setAvatarUrl(url);
-            updateProfile({ username, website, avatarUrl: url });
+            updateProfile({ username, avatarUrl: url });
           }}
         />
       </View>
@@ -102,19 +97,9 @@ export default function Profile({ session }: { session: Session }) {
           onChangeText={(text) => setUsername(text)}
         />
       </View>
-      <View style={styles.verticallySpaced}>
-        <TextInput
-          label="Website"
-          value={website || ''}
-          onChangeText={(text) => {
-            setWebsite(text);
-          }}
-        />
-      </View>
-
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button
-          onPress={() => updateProfile({ username, website, avatarUrl })}
+          onPress={() => updateProfile({ username, avatarUrl })}
           disabled={loading}>
           {loading ? 'Loading...' : 'Update Profile'}
         </Button>
