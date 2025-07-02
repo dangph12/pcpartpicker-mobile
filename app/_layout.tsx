@@ -20,6 +20,39 @@ export default function RootLayout() {
               name="profile"
               options={{ title: 'Profile', headerShown: true }}
             />
+
+            <Drawer.Screen
+              name="admin"
+              options={{
+                title: 'Admin Panel',
+                drawerItemStyle: { display: 'none' },
+                headerShown: true,
+              }}
+            />
+            <Drawer.Screen
+              name="admin/dashboard"
+              options={{
+                title: 'Admin Dashboard',
+                drawerItemStyle: { display: 'none' },
+                headerShown: true,
+              }}
+            />
+            <Drawer.Screen
+              name="admin/users"
+              options={{
+                title: 'Admin Users',
+                drawerItemStyle: { display: 'none' },
+                headerShown: true,
+              }}
+            />
+            <Drawer.Screen
+              name="admin/settings"
+              options={{
+                title: 'Admin Settings',
+                drawerItemStyle: { display: 'none' },
+                headerShown: true,
+              }}
+            />
           </Drawer>
         </AuthProvider>
       </SafeAreaProvider>
