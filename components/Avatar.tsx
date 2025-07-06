@@ -6,19 +6,27 @@ import { Button } from 'react-native-paper';
 import { supabase } from '~/lib/subpabase';
 
 interface AvatarProps {
-  size: number;
+  size?: number;
   url: string | null;
   onUpload: (filePath: string) => void;
+  showUploadButton?: boolean;
 }
 
-const Avatar = ({ url, size = 150, onUpload }: AvatarProps) => {
+const Avatar = ({
+  url,
+  size = 150,
+  onUpload,
+  showUploadButton = true,
+}: AvatarProps) => {
   const [uploading, setUploading] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(url);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const avatarSize = { height: size, width: size };
 
   useEffect(() => {
     if (url) {
       downloadImage(url);
+    } else {
+      downloadImage('default.png');
     }
   }, [url]);
 
@@ -29,7 +37,9 @@ const Avatar = ({ url, size = 150, onUpload }: AvatarProps) => {
         .download(path);
 
       if (error) {
-        throw error;
+        console.warn('Error downloading image: ', error.message);
+        setAvatarUrl(null);
+        return;
       }
 
       if (data) {
@@ -40,6 +50,7 @@ const Avatar = ({ url, size = 150, onUpload }: AvatarProps) => {
       if (error instanceof Error) {
         console.warn('Error downloading image: ', error.message);
       }
+      setAvatarUrl(null);
     }
   };
 
@@ -91,7 +102,7 @@ const Avatar = ({ url, size = 150, onUpload }: AvatarProps) => {
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       {avatarUrl ? (
         <Image
           source={{ uri: avatarUrl }}
@@ -99,33 +110,40 @@ const Avatar = ({ url, size = 150, onUpload }: AvatarProps) => {
           style={[avatarSize, styles.avatar, styles.image]}
         />
       ) : (
-        <View style={[avatarSize, styles.avatar, styles.noImage]}></View>
+        <View style={[avatarSize, styles.avatar, styles.noImage]} />
       )}
-      <View>
-        <Button onPress={uploadAvatar} disabled={uploading}>
-          {uploading ? 'Uploading...' : 'Upload'}
-        </Button>
-      </View>
+      {showUploadButton && (
+        <View style={styles.buttonContainer}>
+          <Button mode="outlined" onPress={uploadAvatar} disabled={uploading}>
+            {uploading ? 'Uploading...' : 'Change Avatar'}
+          </Button>
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    marginVertical: 16,
+  },
   avatar: {
-    borderRadius: 5,
+    borderRadius: 75,
     overflow: 'hidden',
-    maxWidth: '100%',
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
   },
   image: {
     objectFit: 'cover',
-    paddingTop: 0,
   },
   noImage: {
-    backgroundColor: '#333',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'rgb(200, 200, 200)',
-    borderRadius: 5,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonContainer: {
+    marginTop: 12,
   },
 });
 

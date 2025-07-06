@@ -1,7 +1,7 @@
 import RegisterForm from '~/components/RegisterForm';
 
 const Index = () => {
-  return <div>Index</div>;
+  return <RegisterForm />;
 };
 
 export default Index;
