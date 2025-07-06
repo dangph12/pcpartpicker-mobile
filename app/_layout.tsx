@@ -17,40 +17,29 @@ export default function RootLayout() {
               headerShown: false,
             }}>
             <Drawer.Screen
+              name="(tabs)"
+              options={{
+                title: 'Home',
+                headerShown: false,
+              }}
+            />
+            <Drawer.Screen
               name="profile"
               options={{ title: 'Profile', headerShown: true }}
             />
-
+            <Drawer.Screen
+              name="login"
+              options={{ title: 'Login', headerShown: true }}
+            />
+            <Drawer.Screen
+              name="register"
+              options={{ title: 'Register', headerShown: true }}
+            />
             <Drawer.Screen
               name="admin"
               options={{
                 title: 'Admin Panel',
-                drawerItemStyle: { display: 'none' },
-                headerShown: true,
-              }}
-            />
-            <Drawer.Screen
-              name="admin/dashboard"
-              options={{
-                title: 'Admin Dashboard',
-                drawerItemStyle: { display: 'none' },
-                headerShown: true,
-              }}
-            />
-            <Drawer.Screen
-              name="admin/users"
-              options={{
-                title: 'Admin Users',
-                drawerItemStyle: { display: 'none' },
-                headerShown: true,
-              }}
-            />
-            <Drawer.Screen
-              name="admin/settings"
-              options={{
-                title: 'Admin Settings',
-                drawerItemStyle: { display: 'none' },
-                headerShown: true,
+                headerShown: false,
               }}
             />
           </Drawer>
