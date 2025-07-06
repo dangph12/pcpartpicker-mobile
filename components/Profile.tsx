@@ -55,7 +55,6 @@ export default function Profile({ session }: { session: Session }) {
       const { user } = session;
 
       try {
-        // Get profile data
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('phone, address, avatar_url')
@@ -73,7 +72,7 @@ export default function Profile({ session }: { session: Session }) {
             setAvatarUrl(profileData.avatar_url || 'default.png');
           }
 
-          // Set display name from auth metadata
+          // display name is in auth metadata
           setValue('displayName', user.user_metadata?.display_name || '');
         }
       } catch (error) {
@@ -102,7 +101,6 @@ export default function Profile({ session }: { session: Session }) {
         throw new Error('No user session found');
       }
 
-      // Update auth user metadata (display_name)
       const { error: authError } = await supabase.auth.updateUser({
         data: { display_name: data.displayName },
       });
@@ -111,7 +109,6 @@ export default function Profile({ session }: { session: Session }) {
         throw authError;
       }
 
-      // Update profile data
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
