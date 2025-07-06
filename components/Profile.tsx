@@ -1,129 +1,332 @@
 /* eslint-disable import/no-unresolved */
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Session } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
-import { Button, TextInput } from 'react-native-paper';
+import { Controller, useForm } from 'react-hook-form';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { Button, Card, HelperText, Text, TextInput } from 'react-native-paper';
+import { z } from 'zod';
 import { supabase } from '~/lib/subpabase';
 import Avatar from './Avatar';
+import ErrorToast from './toasts/ErrorToast';
+import SuccessToast from './toasts/SuccessToast';
+
+const profileSchema = z.object({
+  displayName: z.string().min(1, 'Display name is required').trim(),
+  phone: z.string().min(10, 'Phone number must be at least 10 digits').trim(),
+  address: z.string().min(1, 'Address is required').trim(),
+});
+
+type ProfileFormData = z.infer<typeof profileSchema>;
 
 export default function Profile({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [updating, setUpdating] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('default.png');
+
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      displayName: '',
+      phone: '',
+      address: '',
+    },
+  });
 
   useEffect(() => {
     let ignore = false;
     const getProfile = async () => {
       setLoading(true);
       const { user } = session;
-      const { data, error } = await supabase
-        .from('profiles')
-        .select(`username, avatar_url`)
-        .eq('id', user.id)
-        .single();
 
-      if (!ignore) {
-        if (error) {
-          console.warn(error);
-        } else if (data) {
-          setUsername(data.username || '');
-          setAvatarUrl(data.avatar_url || '');
+      try {
+        // Get profile data
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('phone, address, avatar_url')
+          .eq('id', user.id)
+          .single();
+
+        if (!ignore) {
+          if (profileError) {
+            console.warn('Profile error:', profileError);
+            setErrorMessage('Failed to load profile data');
+            setShowErrorToast(true);
+          } else if (profileData) {
+            setValue('phone', profileData.phone || '');
+            setValue('address', profileData.address || '');
+            setAvatarUrl(profileData.avatar_url || 'default.png');
+          }
+
+          // Set display name from auth metadata
+          setValue('displayName', user.user_metadata?.display_name || '');
+        }
+      } catch (error) {
+        if (!ignore) {
+          console.error('Error loading profile:', error);
+          setErrorMessage('Failed to load profile');
+          setShowErrorToast(true);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
         }
       }
-      setLoading(false);
     };
+
     getProfile();
     return () => {
       ignore = true;
     };
-  }, [session]);
-  const updateProfile = async ({
-    username,
-    avatarUrl,
-  }: {
-    username: string;
-    avatarUrl: string;
-  }) => {
+  }, [session, setValue]);
+
+  const onSubmit = async (data: ProfileFormData) => {
+    setUpdating(true);
     try {
-      setLoading(true);
       if (!session?.user) {
         throw new Error('No user session found');
       }
-      const updates = {
-        id: session.user.id,
-        username,
-        avatar_url: avatarUrl,
-        updated_at: new Date(),
-      };
-      const { error } = await supabase.from('profiles').upsert(updates);
-      if (error) {
-        throw error;
+
+      // Update auth user metadata (display_name)
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { display_name: data.displayName },
+      });
+
+      if (authError) {
+        throw authError;
       }
+
+      // Update profile data
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          phone: data.phone,
+          address: data.address,
+          avatar_url: avatarUrl,
+          updated_at: new Date(),
+        })
+        .eq('id', session.user.id);
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      setSuccessMessage('Profile updated successfully!');
+      setShowSuccessToast(true);
     } catch (error) {
       if (error instanceof Error) {
-        console.error('Error updating profile:', error.message);
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage('An unexpected error occurred');
       }
+      setShowErrorToast(true);
+      console.error('Error updating profile:', error);
     } finally {
-      setLoading(false);
+      setUpdating(false);
     }
   };
+
   const signOut = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      Alert.alert(error.message);
+    setUpdating(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        setErrorMessage(error.message);
+        setShowErrorToast(true);
+      }
+    } catch (error) {
+      setErrorMessage('Error signing out');
+      setShowErrorToast(true);
+    } finally {
+      setUpdating(false);
     }
-    setLoading(false);
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text>Loading profile...</Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <View style={{ alignItems: 'center', marginBottom: 20 }}>
-        <Avatar
-          size={200}
-          url={avatarUrl}
-          onUpload={(url: string) => {
-            setAvatarUrl(url);
-            updateProfile({ username, avatarUrl: url });
-          }}
-        />
-      </View>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <TextInput label="Email" value={session.user?.email || ''} disabled />
-      </View>
-      <View style={styles.verticallySpaced}>
-        <TextInput
-          label="Username"
-          value={username || ''}
-          onChangeText={(text) => setUsername(text)}
-        />
-      </View>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button
-          onPress={() => updateProfile({ username, avatarUrl })}
-          disabled={loading}>
-          {loading ? 'Loading...' : 'Update Profile'}
-        </Button>
-      </View>
-      <View style={styles.verticallySpaced}>
-        <Button onPress={() => signOut()} disabled={loading}>
-          {loading ? 'Loading...' : 'Sign Out'}
-        </Button>
-      </View>
-    </View>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <SuccessToast
+        message={successMessage}
+        showToast={showSuccessToast}
+        setShowToast={setShowSuccessToast}
+      />
+      <ErrorToast
+        message={errorMessage}
+        showToast={showErrorToast}
+        setShowToast={setShowErrorToast}
+      />
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text variant="headlineMedium" style={styles.title}>
+              My Profile
+            </Text>
+
+            <Avatar
+              size={120}
+              url={avatarUrl}
+              onUpload={(filePath: string) => setAvatarUrl(filePath)}
+            />
+
+            <View style={styles.formContainer}>
+              <Controller
+                control={control}
+                name="displayName"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <>
+                    <TextInput
+                      label="Display Name"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      mode="outlined"
+                      style={styles.input}
+                      error={!!errors.displayName}
+                      right={<TextInput.Icon icon="account" />}
+                    />
+                    <HelperText type="error" visible={!!errors.displayName}>
+                      {errors.displayName?.message}
+                    </HelperText>
+                  </>
+                )}
+              />
+
+              <TextInput
+                label="Email"
+                value={session.user?.email || ''}
+                mode="outlined"
+                disabled
+                style={styles.input}
+                right={<TextInput.Icon icon="email" />}
+              />
+              <HelperText type="info" visible>
+                Email cannot be changed
+              </HelperText>
+
+              <Controller
+                control={control}
+                name="phone"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <>
+                    <TextInput
+                      label="Phone"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      mode="outlined"
+                      keyboardType="phone-pad"
+                      placeholder="0901234567"
+                      style={styles.input}
+                      error={!!errors.phone}
+                      right={<TextInput.Icon icon="phone" />}
+                    />
+                    <HelperText type="error" visible={!!errors.phone}>
+                      {errors.phone?.message}
+                    </HelperText>
+                  </>
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="address"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <>
+                    <TextInput
+                      label="Address"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      mode="outlined"
+                      style={styles.input}
+                      error={!!errors.address}
+                      right={<TextInput.Icon icon="map-marker" />}
+                    />
+                    <HelperText type="error" visible={!!errors.address}>
+                      {errors.address?.message}
+                    </HelperText>
+                  </>
+                )}
+              />
+
+              <Button
+                mode="contained"
+                onPress={handleSubmit(onSubmit)}
+                loading={updating}
+                disabled={updating}
+                style={styles.button}>
+                Update Profile
+              </Button>
+
+              <Button
+                mode="outlined"
+                onPress={signOut}
+                disabled={updating}
+                style={styles.signOutButton}>
+                Sign Out
+              </Button>
+            </View>
+          </Card.Content>
+        </Card>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 40,
-    padding: 12,
+    flex: 1,
+    padding: 16,
   },
-  verticallySpaced: {
-    paddingTop: 4,
-    paddingBottom: 4,
-    alignSelf: 'stretch',
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  mt20: {
+  card: {
     marginTop: 20,
+  },
+  title: {
+    textAlign: 'center',
+    marginBottom: 24,
+    fontWeight: 'bold',
+  },
+  formContainer: {
+    gap: 8,
+  },
+  input: {
+    marginBottom: 4,
+  },
+  button: {
+    marginTop: 16,
+    paddingVertical: 8,
+  },
+  signOutButton: {
+    marginTop: 8,
+    paddingVertical: 8,
   },
 });
