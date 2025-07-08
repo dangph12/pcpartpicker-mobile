@@ -191,6 +191,18 @@ export default function Profile({ session }: { session: Session }) {
             />
 
             <View style={styles.formContainer}>
+              <TextInput
+                label="Email"
+                value={session.user?.email || ''}
+                mode="outlined"
+                disabled
+                style={styles.input}
+                right={<TextInput.Icon icon="email" />}
+              />
+              <HelperText type="info" visible>
+                Email cannot be changed
+              </HelperText>
+
               <Controller
                 control={control}
                 name="displayName"
@@ -212,18 +224,6 @@ export default function Profile({ session }: { session: Session }) {
                   </>
                 )}
               />
-
-              <TextInput
-                label="Email"
-                value={session.user?.email || ''}
-                mode="outlined"
-                disabled
-                style={styles.input}
-                right={<TextInput.Icon icon="email" />}
-              />
-              <HelperText type="info" visible>
-                Email cannot be changed
-              </HelperText>
 
               <Controller
                 control={control}
