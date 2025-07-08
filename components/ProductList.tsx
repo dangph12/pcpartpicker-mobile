@@ -10,8 +10,9 @@ const ProductList = ({ tableSource }: { tableSource: string }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (tableSource: string) => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from(tableSource)
         .select('id, name, image_url, price, manufacturer')
@@ -30,9 +31,8 @@ const ProductList = ({ tableSource }: { tableSource: string }) => {
   };
 
   useEffect(() => {
-    fetchProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    fetchProducts(tableSource);
+  }, [tableSource]);
 
   if (loading) {
     return <Loading />;
@@ -42,7 +42,9 @@ const ProductList = ({ tableSource }: { tableSource: string }) => {
     <View style={styles.container}>
       <FlatList
         data={products}
-        renderItem={({ item }) => <ProductItem item={item} />}
+        renderItem={({ item }) => (
+          <ProductItem item={item} tableSource={tableSource} />
+        )}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         contentContainerStyle={styles.listContainer}

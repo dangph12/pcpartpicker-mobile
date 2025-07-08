@@ -1,11 +1,29 @@
 /* eslint-disable import/no-unresolved */
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Product from '~/types/Product';
 
-const ProductItem = ({ item }: { item: Product }) => {
+const ProductItem = ({
+  item,
+  tableSource,
+}: {
+  item: Product;
+  tableSource?: string;
+}) => {
+  const router = useRouter();
+
+  const handlePress = () => {
+    if (tableSource) {
+      router.push(`/(tabs)/search/${tableSource}/${item.id}` as any);
+    }
+  };
+
   return (
-    <View style={styles.productCard}>
+    <TouchableOpacity
+      style={styles.productCard}
+      onPress={handlePress}
+      activeOpacity={0.7}>
       <Image
         source={{ uri: item.image_url }}
         style={styles.productImage}
@@ -15,8 +33,8 @@ const ProductItem = ({ item }: { item: Product }) => {
         {item.name}
       </Text>
       <Text style={styles.productPrice}>${item.price || 'N/A'}</Text>
-      <Text>Manufacturer: {item.manufacturer}</Text>
-    </View>
+      <Text style={styles.manufacturer}>Manufacturer: {item.manufacturer}</Text>
+    </TouchableOpacity>
   );
 };
 
@@ -55,5 +73,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#0066cc',
     marginBottom: 4,
+  },
+  manufacturer: {
+    fontSize: 10,
+    color: '#666',
   },
 });
