@@ -51,4 +51,5 @@ export const tableSourceMap = {
   },
 };
 
+// TypeScript type for the table source map
 export type TableSourceKey = keyof typeof tableSourceMap;

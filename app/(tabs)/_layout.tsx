@@ -35,6 +35,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="search/[tableSource]/[id]"
+        options={{
+          href: null,
+          title: 'Product Detail',
+        }}
+      />
+      <Tabs.Screen
         name="builder"
         options={{
           title: 'Builder',
