@@ -19,14 +19,21 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="search/index"
         options={{
           title: 'Search',
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="search" color={color} />
           ),
         }}
-      />{' '}
+      />
+      <Tabs.Screen
+        name="search/[tableSource]"
+        options={{
+          href: null,
+          title: 'Search',
+        }}
+      />
       <Tabs.Screen
         name="builder"
         options={{

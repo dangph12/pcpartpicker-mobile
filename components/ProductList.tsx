@@ -1,17 +1,9 @@
 /* eslint-disable import/no-unresolved */
-import { Link } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import Loading from '~/components/Loading';
 import { supabase } from '~/lib/subpabase';
 import Product from '~/types/Product';
-import { convertTableSource } from '~/utils/convertTableSource';
 import ProductItem from './ProductItem';
 
 const ProductList = ({ tableSource }: { tableSource: string }) => {
@@ -42,45 +34,21 @@ const ProductList = ({ tableSource }: { tableSource: string }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const renderItem = ({ item, index }: { item: Product; index: number }) => {
-    if (index === products.length) {
-      return (
-        <TouchableOpacity style={styles.showAllCard}>
-          <Link
-            href={{ pathname: '/search', params: { category: tableSource } }}>
-            <Text style={styles.showAllText}>Show All</Text>
-          </Link>
-        </TouchableOpacity>
-      );
-    }
-    return <ProductItem item={item} />;
-  };
-
   if (loading) {
     return <Loading />;
   }
 
   return (
     <View style={styles.container}>
-      <View style={{ padding: 10 }}>
-        <Link
-          href={{ pathname: '/search', params: { category: tableSource } }}
-          style={styles.header}>
-          <Text>{convertTableSource(tableSource)}</Text>
-          <Text style={{ marginLeft: 'auto', color: 'blue' }}>
-            See All &gt;
-          </Text>
-        </Link>
-      </View>
       <FlatList
-        data={[...products, {} as Product]} // Add empty object for "Show All" item
-        renderItem={renderItem}
-        keyExtractor={(item, index) =>
-          index === products.length ? 'show-all' : item.id
-        }
-        horizontal
-        showsHorizontalScrollIndicator={false}
+        data={products}
+        renderItem={({ item }) => <ProductItem item={item} />}
+        keyExtractor={(item) => item.id.toString()}
+        numColumns={2}
         contentContainerStyle={styles.listContainer}
+        columnWrapperStyle={styles.row}
+        showsVerticalScrollIndicator={false}
+        style={styles.flatList}
       />
     </View>
   );
@@ -90,11 +58,19 @@ export default ProductList;
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  flatList: {
+    flex: 1,
   },
   listContainer: {
     paddingHorizontal: 10,
-    marginVertical: 10,
+    paddingVertical: 10,
+  },
+  row: {
+    justifyContent: 'space-between',
+    paddingHorizontal: 5,
   },
   header: {
     display: 'flex',
