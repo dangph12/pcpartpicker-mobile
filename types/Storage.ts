@@ -1,11 +1,12 @@
-create table public.storage_detailed (
-  part text null,
-  capacity text null,
-  price_over_gb text null,
-  type text null,
-  cache text null,
-  form_factor text null,
-  interface text null,
-  nvme text null,
-  constraint storage_detailed_pkey primary key (id)
-) TABLESPACE pg_default;
+import Product from './Product';
+
+export default interface Storage extends Product {
+  part: string;
+  capacity: string;
+  price_over_gb: string;
+  type: string;
+  cache: string;
+  form_factor: string;
+  interface: string;
+  nvme: string;
+}

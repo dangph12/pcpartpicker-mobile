@@ -1,28 +1,28 @@
 import Product from './Product';
 
 export default interface Gpu extends Product {
-  part text null,
-  chipset text null,
-  memory text null,
-  memory_type text null,
-  core_clock text null,
-  boost_clock text null,
-  effective_memory_clock text null,
-  interface text null,
-  color text null,
-  frame_sync text null,
-  length text null,
-  tdp text null,
-  case_expansion_slot_width bigint null,
-  total_slot_width bigint null,
-  cooling text null,
-  external_power text null,
-  hdmi_outputs text null,
-  display_port_outputs text null,
-  dvi_d_dual_link_outputs text null,
-  hdmi_2_1a_outputs text null,
-  display_port_1_4_outputs text null,
-  display_port_1_4a_outputs text null,
-  display_port_2_1_outputs text null,
-  sli_cross_fire text null,
+  part: string;
+  chipset: string;
+  memory: string;
+  memory_type: string;
+  core_clock: string;
+  boost_clock: string;
+  effective_memory_clock: string;
+  interface: string;
+  color: string;
+  frame_sync: string;
+  length: string;
+  tdp: string;
+  case_expansion_slot_width: number;
+  total_slot_width: number;
+  cooling: string;
+  external_power: string;
+  hdmi_outputs: string;
+  display_port_outputs: string;
+  dvi_d_dual_link_outputs: string;
+  hdmi_2_1a_outputs: string;
+  display_port_1_4_outputs: string;
+  display_port_1_4a_outputs: string;
+  display_port_2_1_outputs: string;
+  sli_cross_fire: string;
 }

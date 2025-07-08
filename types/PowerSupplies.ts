@@ -1,28 +1,23 @@
-create table public.power_supplies_detailed (
-  id uuid not null default gen_random_uuid (),
-  name text null,
-  image_url text null,
-  product_url text null,
-  price text null,
-  manufacturer text null,
-  model text null,
-  part text null,
-  type text null,
-  efficiency_rating text null,
-  wattage text null,
-  length text null,
-  modular text null,
-  color text null,
-  fanless text null,
-  atx_4_pin_connectors text null,
-  eps_8_pin_connectors bigint null,
-  "pcie_12_plus_4_pin_12VHPWR_connectors" bigint null,
-  pcie_2_pin_connectors text null,
-  pcie_8_pin_connectors text null,
-  pcie_6_plus_2_pin_connectors bigint null,
-  pcie_6_pin_connectors text null,
-  sata_connectors bigint null,
-  molex_4_pin_connectors bigint null,
-  specs_number bigint null,
-  constraint power_supplies_detailed_pkey primary key (id)
-) TABLESPACE pg_default;
+import Product from './Product';
+
+export default interface PowerSupply extends Product {
+  model: string;
+  part: string;
+  type: string;
+  efficiency_rating: string;
+  wattage: string;
+  length: string;
+  modular: string;
+  color: string;
+  fanless: string;
+  atx_4_pin_connectors: string;
+  eps_8_pin_connectors: number;
+  pcie_12_plus_4_pin_12VHPWR_connectors: number;
+  pcie_2_pin_connectors: string;
+  pcie_8_pin_connectors: string;
+  pcie_6_plus_2_pin_connectors: number;
+  pcie_6_pin_connectors: string;
+  sata_connectors: number;
+  molex_4_pin_connectors: number;
+  specs_number: number;
+}

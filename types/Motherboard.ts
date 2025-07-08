@@ -1,39 +1,34 @@
-create table public.motherboards_detailed (
-  id uuid not null default gen_random_uuid (),
-  name text null,
-  image_url text null,
-  product_url text null,
-  price text null,
-  manufacturer text null,
-  part text null,
-  socket_over_cpu text null,
-  form_factor text null,
-  chipset text null,
-  memory_max text null,
-  memory_type text null,
-  memory_slots bigint null,
-  memory_speed text null,
-  color text null,
-  pcie_x16_slots bigint null,
-  pcie_x8_slots text null,
-  pcie_x4_slots text null,
-  pcie_x1_slots bigint null,
-  pci_slots text null,
-  m_2_slots text null,
-  mini_pcie_slots text null,
-  half_mini_pcie_slots text null,
-  mini_pcie_over_msata_slots text null,
-  msata_slots text null,
-  sata_6_0_gb_over_second bigint null,
-  onboard_ethernet text null,
-  onboard_video text null,
-  usb_2_0_headers bigint null,
-  usb_2_0_headers_single_port text null,
-  usb_3_2_gen_1_headers bigint null,
-  usb_3_2_gen_2_headers bigint null,
-  usb_3_2_gen_2x2_headers text null,
-  supports_ecc text null,
-  wireless_networking text null,
-  raid_support text null,
-  constraint motherboards_detailed_pkey primary key (id)
-) TABLESPACE pg_default;
+import Product from './Product';
+
+export default interface Motherboard extends Product {
+  part: string;
+  socket_over_cpu: string;
+  form_factor: string;
+  chipset: string;
+  memory_max: string;
+  memory_type: string;
+  memory_slots: number;
+  memory_speed: string;
+  color: string;
+  pcie_x16_slots: number;
+  pcie_x8_slots: string;
+  pcie_x4_slots: string;
+  pcie_x1_slots: number;
+  pci_slots: string;
+  m_2_slots: string;
+  mini_pcie_slots: string;
+  half_mini_pcie_slots: string;
+  mini_pcie_over_msata_slots: string;
+  msata_slots: string;
+  sata_6_0_gb_over_second: number;
+  onboard_ethernet: string;
+  onboard_video: string;
+  usb_2_0_headers: number;
+  usb_2_0_headers_single_port: string;
+  usb_3_2_gen_1_headers: number;
+  usb_3_2_gen_2_headers: number;
+  usb_3_2_gen_2x2_headers: string;
+  supports_ecc: string;
+  wireless_networking: string;
+  raid_support: string;
+}

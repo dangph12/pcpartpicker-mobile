@@ -3,12 +3,12 @@ import Product from './Product';
 export default interface CpuCooler extends Product {
   model: string;
   part: string;
-  fanRpm: string;
-  noiseLevel: string;
+  fan_rpm: string;
+  noise_level: string;
   color: string;
   height: string;
-  cpuSocket: string;
-  waterCooled: string;
+  cpu_socket: string;
+  water_cooled: string;
   fanless: string;
   specs_number: number;
 }
