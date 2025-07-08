@@ -3,7 +3,7 @@ import { useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import ProductList from '~/components/ProductList';
-import { tableSourceMap } from '~/utils/tableSourceUtils';
+import { TableSourceKey, tableSourceMap } from '~/utils/tableSourceUtils';
 
 export default function TableSourceScreen() {
   const { tableSource } = useLocalSearchParams<{ tableSource: string }>();
@@ -12,11 +12,17 @@ export default function TableSourceScreen() {
     return null;
   }
 
+  const sourceInfo = tableSourceMap[tableSource as TableSourceKey];
+
+  if (!sourceInfo) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>{}</Text>
-        <Text style={styles.subtitle}>{}</Text>
+        <Text style={styles.title}>{sourceInfo.name}</Text>
+        <Text style={styles.subtitle}>{sourceInfo.description}</Text>
       </View>
       <ProductList tableSource={tableSource} />
     </View>
