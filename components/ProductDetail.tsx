@@ -1,6 +1,6 @@
 /* eslint-disable import/no-unresolved */
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Loading from '~/components/Loading';
 import { supabase } from '~/lib/subpabase';
 import Case from '~/types/Case';
@@ -13,6 +13,7 @@ import PowerSupply from '~/types/PowerSupplies';
 import Storage from '~/types/Storage';
 import { formatSpecLabel } from '~/utils/formatSpecLabel';
 import { TableSourceKey, tableSourceMap } from '~/utils/tableSourceUtils';
+import ErrorToast from './toasts/ErrorToast';
 
 type ProductType =
   | Case
@@ -33,6 +34,8 @@ const ProductDetail = ({
 }) => {
   const [product, setProduct] = useState<ProductType | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const fetchProductDetail = async () => {
     if (!tableSource || !id) return;
@@ -47,13 +50,15 @@ const ProductDetail = ({
 
       if (error) {
         console.error('Error fetching product detail:', error);
-        Alert.alert('Error', 'Failed to load product details');
+        setErrorMessage('Failed to load product details');
+        setShowErrorToast(true);
       } else {
         setProduct(data);
       }
     } catch (error) {
       console.error('Error:', error);
-      Alert.alert('Error', 'An unexpected error occurred');
+      setErrorMessage('An unexpected error occurred');
+      setShowErrorToast(true);
     } finally {
       setLoading(false);
     }
@@ -103,6 +108,11 @@ const ProductDetail = ({
 
   return (
     <ScrollView style={styles.container}>
+      <ErrorToast
+        message={errorMessage}
+        showToast={showErrorToast}
+        setShowToast={setShowErrorToast}
+      />
       <View style={styles.header}>
         <Text style={styles.category}>{sourceInfo.name}</Text>
         <Text style={styles.title}>{product.name}</Text>

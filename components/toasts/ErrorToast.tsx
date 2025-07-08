@@ -39,7 +39,7 @@ const ErrorToast: React.FC<ErrorToastProps> = ({
 
       const timer = setTimeout(() => {
         hideToast();
-      }, 4000); // Slightly longer for error messages
+      }, 4000);
 
       return () => clearTimeout(timer);
     }

@@ -5,10 +5,13 @@ import Loading from '~/components/Loading';
 import { supabase } from '~/lib/subpabase';
 import Product from '~/types/Product';
 import ProductItem from './ProductItem';
+import ErrorToast from './toasts/ErrorToast';
 
 const ProductList = ({ tableSource }: { tableSource: string }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const fetchProducts = async (tableSource: string) => {
     try {
@@ -20,11 +23,15 @@ const ProductList = ({ tableSource }: { tableSource: string }) => {
 
       if (error) {
         console.error('Error fetching products:', error);
+        setErrorMessage('Failed to load products. Please try again.');
+        setShowErrorToast(true);
       } else {
         setProducts(data || []);
       }
     } catch (error) {
       console.error('Error:', error);
+      setErrorMessage('An unexpected error occurred while loading products.');
+      setShowErrorToast(true);
     } finally {
       setLoading(false);
     }
@@ -40,6 +47,11 @@ const ProductList = ({ tableSource }: { tableSource: string }) => {
 
   return (
     <View style={styles.container}>
+      <ErrorToast
+        message={errorMessage}
+        showToast={showErrorToast}
+        setShowToast={setShowErrorToast}
+      />
       <FlatList
         data={products}
         renderItem={({ item }) => (
