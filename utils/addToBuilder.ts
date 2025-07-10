@@ -24,7 +24,9 @@ export const addToBuilder = async (
       part_type: partType,
       part_id: partId,
     },
-    { onConflict: ['builder_id', 'part_type'], ignoreDuplicates: false }
+    {
+      onConflict: 'builder_id,part_type',
+    }
   );
 
   if (error) {
