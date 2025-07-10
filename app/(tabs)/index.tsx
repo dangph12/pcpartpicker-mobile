@@ -1,6 +1,11 @@
 import React from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 
 export default function Homepage() {
-  return <View>Homepage</View>;
+  return (
+    <View>
+      <Text>Welcome to the Homepage!</Text>
+      {/* Add more content or components as needed */}
+    </View>
+  );
 }

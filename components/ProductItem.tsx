@@ -2,7 +2,12 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Button } from 'react-native-paper';
+import ErrorToast from '~/components/toasts/ErrorToast';
+import SuccessToast from '~/components/toasts/SuccessToast';
+import { useAuth } from '~/contexts/AuthContext';
 import Product from '~/types/Product';
+import { addToBuilder } from '~/utils/addToBuilder';
 
 const ProductItem = ({
   item,
@@ -12,29 +17,59 @@ const ProductItem = ({
   tableSource?: string;
 }) => {
   const router = useRouter();
+  const { session } = useAuth();
+  const [showSuccessToast, setShowSuccessToast] = React.useState(false);
+  const [showErrorToast, setShowErrorToast] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState('');
 
-  const handlePress = () => {
-    if (tableSource) {
-      router.push(`/(tabs)/search/${tableSource}/${item.id}` as any);
+  const handleAddToBuilder = async () => {
+    try {
+      await addToBuilder(session?.user.id!, tableSource!, item.id);
+      setShowSuccessToast(true);
+    } catch (error) {
+      setErrorMessage(
+        (error as Error).message || 'Failed to add product to builder.'
+      );
+      setShowErrorToast(true);
     }
   };
 
   return (
-    <TouchableOpacity
-      style={styles.productCard}
-      onPress={handlePress}
-      activeOpacity={0.7}>
-      <Image
-        source={{ uri: item.image_url }}
-        style={styles.productImage}
-        resizeMode="cover"
+    <>
+      <TouchableOpacity
+        style={styles.productCard}
+        onPress={() => router.push(`/(tabs)/search/${tableSource}/${item.id}`)}
+        activeOpacity={0.7}>
+        <Image
+          source={{ uri: item.image_url }}
+          style={styles.productImage}
+          resizeMode="cover"
+        />
+        <Text style={styles.productName} numberOfLines={2}>
+          {item.name}
+        </Text>
+        <Text style={styles.productPrice}>${item.price || 'N/A'}</Text>
+        <Text style={styles.manufacturer}>
+          Manufacturer: {item.manufacturer}
+        </Text>
+        <Button
+          mode="contained"
+          onPress={handleAddToBuilder}
+          style={styles.addButton}>
+          Add to Builder
+        </Button>
+      </TouchableOpacity>
+      <SuccessToast
+        message="Product added to builder successfully!"
+        showToast={showSuccessToast}
+        setShowToast={setShowSuccessToast}
       />
-      <Text style={styles.productName} numberOfLines={2}>
-        {item.name}
-      </Text>
-      <Text style={styles.productPrice}>${item.price || 'N/A'}</Text>
-      <Text style={styles.manufacturer}>Manufacturer: {item.manufacturer}</Text>
-    </TouchableOpacity>
+      <ErrorToast
+        message={errorMessage}
+        showToast={showErrorToast}
+        setShowToast={setShowErrorToast}
+      />
+    </>
   );
 };
 
@@ -77,5 +112,8 @@ const styles = StyleSheet.create({
   manufacturer: {
     fontSize: 10,
     color: '#666',
+  },
+  addButton: {
+    marginTop: 10,
   },
 });
