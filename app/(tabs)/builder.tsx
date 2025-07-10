@@ -11,6 +11,7 @@ import {
 import { Button } from 'react-native-paper';
 import { useAuth } from '~/contexts/AuthContext';
 import { supabase } from '~/lib/subpabase';
+import { removeFromBuilder } from '~/utils/removeFromBuilder';
 import { TableSourceKey, tableSourceMap } from '~/utils/tableSourceUtils';
 
 const BuilderPage = () => {
@@ -68,6 +69,22 @@ const BuilderPage = () => {
     fetchBuilderData();
   }, [session?.user.id]);
 
+  const handleRemoveFromBuilder = async (partType: string) => {
+    try {
+      setLoading(true);
+      await removeFromBuilder(session?.user.id!, partType);
+      setBuilderData((prevData) => {
+        const updatedData = { ...prevData };
+        delete updatedData[`${partType}_id`];
+        return updatedData;
+      });
+    } catch (error) {
+      console.error('Failed to remove part from builder:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -89,9 +106,17 @@ const BuilderPage = () => {
               {tableSourceMap[tableSource].name}
             </Text>
             {productId ? (
-              <Text style={styles.itemDetail}>
-                Selected Product ID: {productId}
-              </Text>
+              <>
+                <Text style={styles.itemDetail}>
+                  Selected Product ID: {productId}
+                </Text>
+                <Button
+                  mode="contained"
+                  onPress={() => handleRemoveFromBuilder(tableSource)}
+                  style={styles.removeButton}>
+                  Remove {tableSourceMap[tableSource].productType}
+                </Button>
+              </>
             ) : (
               <Button
                 mode="contained"
@@ -142,5 +167,9 @@ const styles = StyleSheet.create({
   },
   addButton: {
     marginTop: 10,
+  },
+  removeButton: {
+    marginTop: 10,
+    backgroundColor: 'red',
   },
 });
