@@ -1,7 +1,13 @@
 /* eslint-disable import/no-unresolved */
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Button } from 'react-native-paper';
 import { useAuth } from '~/contexts/AuthContext';
 import { supabase } from '~/lib/subpabase';
@@ -11,10 +17,12 @@ const BuilderPage = () => {
   const router = useRouter();
   const { session } = useAuth();
   const [builderData, setBuilderData] = useState<Record<string, any>>({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBuilderData = async () => {
       try {
+        setLoading(true);
         // Fetch builder_id using user_id
         const { data: builderData, error: builderError } = await supabase
           .from('builder')
@@ -52,11 +60,22 @@ const BuilderPage = () => {
         }
       } catch (err) {
         console.error('Unexpected error:', err);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchBuilderData();
   }, [session?.user.id]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+        <Text>Loading builder data...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
