@@ -18,11 +18,14 @@ export const addToBuilder = async (
 
   const builderId = builderData.id;
 
-  const { error } = await supabase.from('builder_parts').upsert({
-    builder_id: builderId,
-    part_type: partType,
-    part_id: partId,
-  });
+  const { error } = await supabase.from('builder_parts').upsert(
+    {
+      builder_id: builderId,
+      part_type: partType,
+      part_id: partId,
+    },
+    { onConflict: ['builder_id', 'part_type'], ignoreDuplicates: false }
+  );
 
   if (error) {
     throw new Error('Failed to add part to builder');
