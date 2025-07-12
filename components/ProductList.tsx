@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import Loading from '~/components/Loading';
+import Pagination from '~/components/Pagination';
 import { supabase } from '~/lib/subpabase';
 import Product from '~/types/Product';
 import ProductItem from './ProductItem';
@@ -12,14 +13,36 @@ const ProductList = ({ tableSource }: { tableSource: string }) => {
   const [loading, setLoading] = useState(true);
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const fetchProducts = async (tableSource: string) => {
+  const LIMIT = 20;
+
+  const fetchProducts = async (tableSource: string, page: number = 1) => {
     try {
       setLoading(true);
+
+      // First, get the total count
+      const { count, error: countError } = await supabase
+        .from(tableSource)
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) {
+        console.error('Error fetching count:', countError);
+        setErrorMessage('Failed to load products count. Please try again.');
+        setShowErrorToast(true);
+        return;
+      }
+
+      const totalItems = count || 0;
+      setTotalPages(Math.ceil(totalItems / LIMIT));
+
+      // Then fetch the products for current page
+      const offset = (page - 1) * LIMIT;
       const { data, error } = await supabase
         .from(tableSource)
         .select('id, name, image_url, price, manufacturer')
-        .limit(20);
+        .range(offset, offset + LIMIT - 1);
 
       if (error) {
         console.error('Error fetching products:', error);
@@ -37,8 +60,14 @@ const ProductList = ({ tableSource }: { tableSource: string }) => {
     }
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    fetchProducts(tableSource, page);
+  };
+
   useEffect(() => {
-    fetchProducts(tableSource);
+    setCurrentPage(1);
+    fetchProducts(tableSource, 1);
   }, [tableSource]);
 
   if (loading) {
@@ -63,6 +92,12 @@ const ProductList = ({ tableSource }: { tableSource: string }) => {
         columnWrapperStyle={styles.row}
         showsVerticalScrollIndicator={false}
         style={styles.flatList}
+      />
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
       />
     </View>
   );
