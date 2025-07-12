@@ -1,12 +1,15 @@
+/* eslint-disable import/no-unresolved */
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { router, usePathname } from 'expo-router';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Drawer } from 'react-native-paper';
+import { useAuth } from '~/contexts/AuthContext';
 
 const CustomDrawerContent = (props: any) => {
   const pathname = usePathname();
+  const { profile } = useAuth();
 
   return (
     <DrawerContentScrollView {...props}>
@@ -44,28 +47,30 @@ const CustomDrawerContent = (props: any) => {
           onPress={() => router.push('/profile')}
         />
       </Drawer.Section>
-      <Drawer.Section>
-        <DrawerItem
-          label="Admin Dashboard"
-          icon={({ color, size }) => (
-            <Ionicons
-              name="shield-checkmark-outline"
-              color={color}
-              size={size}
-            />
-          )}
-          focused={pathname === '/admin'}
-          onPress={() => router.push('/admin')}
-        />
-        <DrawerItem
-          label="Admin Users"
-          icon={({ color, size }) => (
-            <Ionicons name="people-outline" color={color} size={size} />
-          )}
-          focused={pathname === '/admin/users'}
-          onPress={() => router.push('/admin/users')}
-        />
-      </Drawer.Section>
+      {profile?.role === 'admin' && (
+        <Drawer.Section>
+          <DrawerItem
+            label="Admin Dashboard"
+            icon={({ color, size }) => (
+              <Ionicons
+                name="shield-checkmark-outline"
+                color={color}
+                size={size}
+              />
+            )}
+            focused={pathname === '/admin'}
+            onPress={() => router.push('/admin')}
+          />
+          <DrawerItem
+            label="Admin Users"
+            icon={({ color, size }) => (
+              <Ionicons name="people-outline" color={color} size={size} />
+            )}
+            focused={pathname === '/admin/users'}
+            onPress={() => router.push('/admin/users')}
+          />
+        </Drawer.Section>
+      )}
     </DrawerContentScrollView>
   );
 };
