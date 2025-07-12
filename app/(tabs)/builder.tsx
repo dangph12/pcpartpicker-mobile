@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { Button } from 'react-native-paper';
+import BuilderItem from '~/components/BuilderItem';
 import { useAuth } from '~/contexts/AuthContext';
 import { supabase } from '~/lib/subpabase';
 import { removeFromBuilder } from '~/utils/removeFromBuilder';
@@ -67,7 +68,7 @@ const BuilderPage = () => {
     };
 
     fetchBuilderData();
-  }, [session?.user.id]);
+  }, []);
 
   const handleRemoveFromBuilder = async (partType: string) => {
     try {
@@ -106,17 +107,11 @@ const BuilderPage = () => {
               {tableSourceMap[tableSource].name}
             </Text>
             {productId ? (
-              <>
-                <Text style={styles.itemDetail}>
-                  Selected Product ID: {productId}
-                </Text>
-                <Button
-                  mode="contained"
-                  onPress={() => handleRemoveFromBuilder(tableSource)}
-                  style={styles.removeButton}>
-                  Remove {tableSourceMap[tableSource].productType}
-                </Button>
-              </>
+              <BuilderItem
+                productId={productId}
+                tableSource={tableSource}
+                onRemove={() => handleRemoveFromBuilder(tableSource)}
+              />
             ) : (
               <Button
                 mode="contained"
@@ -161,15 +156,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 5,
   },
-  itemDetail: {
-    fontSize: 14,
-    color: '#333',
-  },
   addButton: {
     marginTop: 10,
-  },
-  removeButton: {
-    marginTop: 10,
-    backgroundColor: 'red',
   },
 });
