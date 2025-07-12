@@ -1,8 +1,10 @@
 /* eslint-disable import/no-unresolved */
 import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, Modal, StyleSheet, View } from 'react-native';
+import { Button } from 'react-native-paper';
 import Loading from '~/components/Loading';
 import Pagination from '~/components/Pagination';
+import ProductFilter, { FilterOptions } from '~/components/ProductFilter';
 import { supabase } from '~/lib/subpabase';
 import Product from '~/types/Product';
 import ProductItem from './ProductItem';
@@ -15,17 +17,71 @@ const ProductList = ({ tableSource }: { tableSource: string }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [showFilter, setShowFilter] = useState(false);
+  const [filters, setFilters] = useState<FilterOptions>({});
 
   const LIMIT = 20;
 
-  const fetchProducts = async (tableSource: string, page: number = 1) => {
+  const fetchProducts = async (
+    tableSource: string,
+    page: number = 1,
+    filterOptions: FilterOptions = {}
+  ) => {
     try {
       setLoading(true);
 
-      // First, get the total count
-      const { count, error: countError } = await supabase
+      // Build the query with filters
+      let countQuery = supabase
         .from(tableSource)
         .select('*', { count: 'exact', head: true });
+      let dataQuery = supabase
+        .from(tableSource)
+        .select('id, name, image_url, price, manufacturer');
+
+      // Apply name filter
+      if (filterOptions.searchName) {
+        const nameFilter = `%${filterOptions.searchName}%`;
+        countQuery = countQuery.ilike('name', nameFilter);
+        dataQuery = dataQuery.ilike('name', nameFilter);
+      }
+
+      // Apply manufacturer filter
+      if (filterOptions.manufacturer) {
+        countQuery = countQuery.eq('manufacturer', filterOptions.manufacturer);
+        dataQuery = dataQuery.eq('manufacturer', filterOptions.manufacturer);
+      }
+
+      // Apply price range filters
+      if (filterOptions.priceRanges && filterOptions.priceRanges.length > 0) {
+        // Build individual conditions for each price range
+        const orConditions: string[] = [];
+
+        filterOptions.priceRanges.forEach((range) => {
+          switch (range) {
+            case '0-100':
+              orConditions.push('and(price.gte.0,price.lte.100)');
+              break;
+            case '100-200':
+              orConditions.push('and(price.gt.100,price.lte.200)');
+              break;
+            case '200-300':
+              orConditions.push('and(price.gt.200,price.lte.300)');
+              break;
+            case '300+':
+              orConditions.push('price.gt.300');
+              break;
+          }
+        });
+
+        if (orConditions.length > 0) {
+          const priceFilter = orConditions.join(',');
+          countQuery = countQuery.or(priceFilter);
+          dataQuery = dataQuery.or(priceFilter);
+        }
+      }
+
+      // First, get the total count
+      const { count, error: countError } = await countQuery;
 
       if (countError) {
         console.error('Error fetching count:', countError);
@@ -39,10 +95,7 @@ const ProductList = ({ tableSource }: { tableSource: string }) => {
 
       // Then fetch the products for current page
       const offset = (page - 1) * LIMIT;
-      const { data, error } = await supabase
-        .from(tableSource)
-        .select('id, name, image_url, price, manufacturer')
-        .range(offset, offset + LIMIT - 1);
+      const { data, error } = await dataQuery.range(offset, offset + LIMIT - 1);
 
       if (error) {
         console.error('Error fetching products:', error);
@@ -62,12 +115,27 @@ const ProductList = ({ tableSource }: { tableSource: string }) => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    fetchProducts(tableSource, page);
+    fetchProducts(tableSource, page, filters);
+  };
+
+  const handleFilterChange = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+    fetchProducts(tableSource, 1, newFilters);
+  };
+
+  const handleOpenFilter = () => {
+    setShowFilter(true);
+  };
+
+  const handleCloseFilter = () => {
+    setShowFilter(false);
   };
 
   useEffect(() => {
     setCurrentPage(1);
-    fetchProducts(tableSource, 1);
+    setFilters({});
+    fetchProducts(tableSource, 1, {});
   }, [tableSource]);
 
   if (loading) {
@@ -81,6 +149,18 @@ const ProductList = ({ tableSource }: { tableSource: string }) => {
         showToast={showErrorToast}
         setShowToast={setShowErrorToast}
       />
+
+      {/* Filter Button */}
+      <View style={styles.filterContainer}>
+        <Button
+          mode="outlined"
+          onPress={handleOpenFilter}
+          icon="filter"
+          style={styles.filterButton}>
+          Filter
+        </Button>
+      </View>
+
       <FlatList
         data={products}
         renderItem={({ item }) => (
@@ -99,6 +179,18 @@ const ProductList = ({ tableSource }: { tableSource: string }) => {
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
+
+      {/* Filter Modal */}
+      <Modal
+        visible={showFilter}
+        animationType="slide"
+        presentationStyle="pageSheet">
+        <ProductFilter
+          tableSource={tableSource}
+          onFilterChange={handleFilterChange}
+          onClose={handleCloseFilter}
+        />
+      </Modal>
     </View>
   );
 };
@@ -109,6 +201,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  filterContainer: {
+    padding: 12,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e1e1e1',
+  },
+  filterButton: {
+    alignSelf: 'flex-end',
   },
   flatList: {
     flex: 1,
