@@ -1,6 +1,7 @@
 /* eslint-disable import/no-unresolved */
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -21,54 +22,59 @@ const BuilderPage = () => {
   const [builderData, setBuilderData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchBuilderData = async () => {
-      try {
-        setLoading(true);
-        // Fetch builder_id using user_id
-        const { data: builderData, error: builderError } = await supabase
-          .from('builder')
-          .select('id')
-          .eq('user_id', session?.user.id)
-          .single();
+  useFocusEffect(
+    useCallback(() => {
+      const fetchBuilderData = async () => {
+        try {
+          setLoading(true);
+          // Fetch builder_id using user_id
+          const { data: builderData, error: builderError } = await supabase
+            .from('builder')
+            .select('id')
+            .eq('user_id', session?.user.id)
+            .single();
 
-        if (builderError || !builderData) {
-          console.error('Error fetching builder_id:', builderError);
-          return;
+          if (builderError || !builderData) {
+            console.error('Error fetching builder_id:', builderError);
+            return;
+          }
+
+          const builderId = builderData.id;
+
+          // Fetch builder parts using builder_id
+          const { data: builderPartsData, error: partsError } = await supabase
+            .from('builder_parts')
+            .select('part_type, part_id')
+            .eq('builder_id', builderId);
+
+          if (partsError) {
+            console.error('Error fetching builder parts data:', partsError);
+          } else {
+            const formattedData: Record<string, string> =
+              builderPartsData.reduce(
+                (
+                  acc: Record<string, string>,
+                  part: { part_type: string; part_id: string }
+                ) => {
+                  acc[`${part.part_type}_id`] = part.part_id;
+                  return acc;
+                },
+                {}
+              );
+            setBuilderData(formattedData);
+          }
+        } catch (err) {
+          console.error('Unexpected error:', err);
+        } finally {
+          setLoading(false);
         }
+      };
 
-        const builderId = builderData.id;
-
-        // Fetch builder parts using builder_id
-        const { data: builderPartsData, error: partsError } = await supabase
-          .from('builder_parts')
-          .select('part_type, part_id')
-          .eq('builder_id', builderId);
-
-        if (partsError) {
-          console.error('Error fetching builder parts data:', partsError);
-        } else {
-          const formattedData: Record<string, string> = builderPartsData.reduce(
-            (
-              acc: Record<string, string>,
-              part: { part_type: string; part_id: string }
-            ) => {
-              acc[`${part.part_type}_id`] = part.part_id;
-              return acc;
-            },
-            {}
-          );
-          setBuilderData(formattedData);
-        }
-      } catch (err) {
-        console.error('Unexpected error:', err);
-      } finally {
-        setLoading(false);
+      if (session?.user.id) {
+        fetchBuilderData();
       }
-    };
-
-    fetchBuilderData();
-  }, []);
+    }, [session?.user.id])
+  );
 
   const handleRemoveFromBuilder = async (partType: string) => {
     try {

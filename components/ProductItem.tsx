@@ -26,6 +26,7 @@ const ProductItem = ({
     try {
       await addToBuilder(session?.user.id!, tableSource!, item.id);
       setShowSuccessToast(true);
+      router.push(`/builder`);
     } catch (error) {
       setErrorMessage(
         (error as Error).message || 'Failed to add product to builder.'

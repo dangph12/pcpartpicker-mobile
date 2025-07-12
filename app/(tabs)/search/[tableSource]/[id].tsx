@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unresolved */
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button } from 'react-native-paper';
@@ -10,6 +10,7 @@ import { useAuth } from '~/contexts/AuthContext';
 import { addToBuilder } from '~/utils/addToBuilder';
 
 export default function ProductDetailScreen() {
+  const router = useRouter();
   const { session } = useAuth();
   const { tableSource, id } = useLocalSearchParams<{
     tableSource: string;
@@ -23,6 +24,7 @@ export default function ProductDetailScreen() {
     try {
       await addToBuilder(session?.user.id!, tableSource!, id!);
       setShowSuccessToast(true);
+      router.push(`/builder`);
     } catch (error) {
       setErrorMessage(
         (error as Error).message || 'Failed to add product to builder.'
