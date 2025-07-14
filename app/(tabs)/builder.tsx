@@ -78,6 +78,41 @@ const BuilderPage = () => {
 
       setProcessingPayment(true);
 
+      // 1. Insert order
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({ user_id: session.user.id })
+        .select()
+        .single();
+
+      if (orderError || !order) {
+        throw new Error(
+          'Failed to create order: ' + (orderError?.message || 'Unknown error')
+        );
+      }
+
+      // 2. Insert order_items for each part in builderData
+      const orderItems = Object.entries(builderData)
+        .filter(([_, partId]) => !!partId)
+        .map(([partType, partId]) => ({
+          order_id: order.id,
+          part_type: partType.replace('_id', ''),
+          part_id: partId,
+          quantity: 1,
+        }));
+
+      if (orderItems.length > 0) {
+        const { error: itemsError } = await supabase
+          .from('order_items')
+          .insert(orderItems);
+        if (itemsError) {
+          throw new Error(
+            'Failed to create order items: ' + itemsError.message
+          );
+        }
+      }
+
+      // 3. Call vnpay-create-payment with orderId
       const { data: paymentData, error: paymentError } =
         await supabase.functions.invoke('vnpay-create-payment', {
           body: {
@@ -85,6 +120,7 @@ const BuilderPage = () => {
             language: 'vn',
             orderInfo: `PC Build Order for ${session?.user.email}`,
             userId: session?.user.id,
+            orderId: order.id,
           },
         });
 
@@ -97,7 +133,7 @@ const BuilderPage = () => {
           pathname: '/payment/vnpay' as any,
           params: {
             url: paymentData.data.paymentUrl,
-            orderId: paymentData.data.orderId,
+            orderId: paymentData.data.orderId || order.id,
           },
         });
       } else {
