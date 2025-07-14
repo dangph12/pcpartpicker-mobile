@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -34,142 +34,144 @@ const PaymentReturnPage = () => {
   );
   const [error, setError] = useState<string | null>(null);
 
-  const processPaymentReturn = useCallback(async () => {
-    try {
-      setLoading(true);
+  useEffect(() => {
+    const processPaymentReturn = async () => {
+      try {
+        setLoading(true);
 
-      if (params && Object.keys(params).length > 0) {
-        const queryParams = new URLSearchParams();
-        Object.entries(params).forEach(([key, value]) => {
-          if (value && typeof value === 'string') {
-            queryParams.append(key, value);
-          } else if (Array.isArray(value) && value.length > 0) {
-            queryParams.append(key, value[0]);
-          }
-        });
-
-        let supabaseUrl =
-          Constants?.expoConfig?.extra?.supabaseUrl ||
-          Constants?.manifest?.extra?.supabaseUrl ||
-          process.env.EXPO_PUBLIC_SUPABASE_URL ||
-          (supabase as any)?.url;
-        let anonKey =
-          Constants?.expoConfig?.extra?.supabaseAnonKey ||
-          Constants?.manifest?.extra?.supabaseAnonKey ||
-          process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
-          (supabase as any)?.auth?.anonKey;
-
-        if (typeof window !== 'undefined') {
-          supabaseUrl = supabaseUrl || (window as any).EXPO_PUBLIC_SUPABASE_URL;
-          anonKey = anonKey || (window as any).EXPO_PUBLIC_SUPABASE_ANON_KEY;
-        }
-        if (!supabaseUrl || !anonKey) {
-          setError('Supabase URL or anon key is missing.');
-          setLoading(false);
-          return;
-        }
-        const edgeUrl = `${supabaseUrl}/functions/v1/vnpay-return?${queryParams.toString()}`;
-
-        let response;
-        try {
-          response = await fetch(edgeUrl, {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${anonKey}`,
-            },
+        if (params && Object.keys(params).length > 0) {
+          const queryParams = new URLSearchParams();
+          Object.entries(params).forEach(([key, value]) => {
+            if (value && typeof value === 'string') {
+              queryParams.append(key, value);
+            } else if (Array.isArray(value) && value.length > 0) {
+              queryParams.append(key, value[0]);
+            }
           });
-        } catch (fetchErr) {
-          setError('Network error calling payment validation service.');
-          setLoading(false);
-          return;
-        }
 
-        if (!response.ok) {
-          const text = await response.text();
-          setError(`VNPay validation failed: ${response.status} ${text}`);
-          setLoading(false);
-          return;
-        }
+          let supabaseUrl =
+            Constants?.expoConfig?.extra?.supabaseUrl ||
+            Constants?.manifest?.extra?.supabaseUrl ||
+            process.env.EXPO_PUBLIC_SUPABASE_URL ||
+            (supabase as any)?.url;
+          let anonKey =
+            Constants?.expoConfig?.extra?.supabaseAnonKey ||
+            Constants?.manifest?.extra?.supabaseAnonKey ||
+            process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
+            (supabase as any)?.auth?.anonKey;
 
-        let vnpayResult;
-        try {
-          vnpayResult = await response.json();
-        } catch (jsonErr) {
-          setError('Invalid response from payment validation service.');
-          setLoading(false);
-          return;
-        }
+          if (typeof window !== 'undefined') {
+            supabaseUrl =
+              supabaseUrl || (window as any).EXPO_PUBLIC_SUPABASE_URL;
+            anonKey = anonKey || (window as any).EXPO_PUBLIC_SUPABASE_ANON_KEY;
+          }
+          if (!supabaseUrl || !anonKey) {
+            setError('Supabase URL or anon key is missing.');
+            setLoading(false);
+            return;
+          }
+          const edgeUrl = `${supabaseUrl}/functions/v1/vnpay-return?${queryParams.toString()}`;
 
-        if (vnpayResult) {
-          let paymentData = null;
-          if (vnpayResult.orderId) {
-            const { data: payment } = await supabase
-              .from('payments')
-              .select('*')
-              .eq('order_id', vnpayResult.orderId)
-              .single();
-            paymentData = payment;
+          let response;
+          try {
+            response = await fetch(edgeUrl, {
+              method: 'GET',
+              headers: {
+                Authorization: `Bearer ${anonKey}`,
+              },
+            });
+          } catch (fetchErr) {
+            setError('Network error calling payment validation service.');
+            setLoading(false);
+            return;
+          }
+
+          if (!response.ok) {
+            const text = await response.text();
+            setError(`VNPay validation failed: ${response.status} ${text}`);
+            setLoading(false);
+            return;
+          }
+
+          let vnpayResult;
+          try {
+            vnpayResult = await response.json();
+          } catch (jsonErr) {
+            setError('Invalid response from payment validation service.');
+            setLoading(false);
+            return;
+          }
+
+          if (vnpayResult) {
+            let paymentData = null;
+            if (vnpayResult.orderId) {
+              const { data: payment } = await supabase
+                .from('payments')
+                .select('*')
+                .eq('order_id', vnpayResult.orderId)
+                .single();
+              paymentData = payment;
+            }
+
+            setPaymentResult({
+              success: vnpayResult.success || false,
+              orderId: vnpayResult.orderId || '',
+              amount: vnpayResult.amount || 0,
+              responseCode: vnpayResult.responseCode || '',
+              message:
+                vnpayResult.message ||
+                (vnpayResult.success ? 'Payment successful' : 'Payment failed'),
+              transactionDate:
+                paymentData?.updated_at ||
+                paymentData?.created_at ||
+                new Date().toISOString(),
+              bankCode: paymentData?.vnpay_response?.vnp_BankCode,
+              cardType: paymentData?.vnpay_response?.vnp_CardType,
+            });
+          } else {
+            throw new Error('No response from VNPay validation service');
+          }
+        } else {
+          const { data: latestPayment, error: paymentError } = await supabase
+            .from('payments')
+            .select('*')
+            .eq('user_id', session?.user.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (paymentError || !latestPayment) {
+            throw new Error('No payment information found');
           }
 
           setPaymentResult({
-            success: vnpayResult.success || false,
-            orderId: vnpayResult.orderId || '',
-            amount: vnpayResult.amount || 0,
-            responseCode: vnpayResult.responseCode || '',
+            success: latestPayment.status === 'completed',
+            orderId: latestPayment.order_id,
+            amount: parseFloat(latestPayment.amount),
+            responseCode: latestPayment.vnpay_response?.vnp_ResponseCode || '',
             message:
-              vnpayResult.message ||
-              (vnpayResult.success ? 'Payment successful' : 'Payment failed'),
+              latestPayment.status === 'completed'
+                ? 'Payment successful'
+                : 'Payment failed',
             transactionDate:
-              paymentData?.updated_at ||
-              paymentData?.created_at ||
-              new Date().toISOString(),
-            bankCode: paymentData?.vnpay_response?.vnp_BankCode,
-            cardType: paymentData?.vnpay_response?.vnp_CardType,
+              latestPayment.updated_at || latestPayment.created_at,
+            bankCode: latestPayment.vnpay_response?.vnp_BankCode,
+            cardType: latestPayment.vnpay_response?.vnp_CardType,
           });
-        } else {
-          throw new Error('No response from VNPay validation service');
         }
-      } else {
-        const { data: latestPayment, error: paymentError } = await supabase
-          .from('payments')
-          .select('*')
-          .eq('user_id', session?.user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (paymentError || !latestPayment) {
-          throw new Error('No payment information found');
-        }
-
-        setPaymentResult({
-          success: latestPayment.status === 'completed',
-          orderId: latestPayment.order_id,
-          amount: parseFloat(latestPayment.amount),
-          responseCode: latestPayment.vnpay_response?.vnp_ResponseCode || '',
-          message:
-            latestPayment.status === 'completed'
-              ? 'Payment successful'
-              : 'Payment failed',
-          transactionDate: latestPayment.updated_at || latestPayment.created_at,
-          bankCode: latestPayment.vnpay_response?.vnp_BankCode,
-          cardType: latestPayment.vnpay_response?.vnp_CardType,
-        });
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'An unexpected error occurred'
+        );
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'An unexpected error occurred'
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [params]);
-
-  useEffect(() => {
+    };
     if (session?.user.id) {
       processPaymentReturn();
     }
-  }, []);
+    // Json stringify is used to ensure the effect runs when params change
+  }, [JSON.stringify(params), session?.user.id]);
 
   const handleContinueShopping = () => {
     router.replace('/(tabs)/builder');

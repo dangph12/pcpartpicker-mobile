@@ -85,11 +85,6 @@ const VNPayPage = () => {
     }
   };
 
-  const handleWebViewError = (syntheticEvent: any) => {
-    const { nativeEvent } = syntheticEvent;
-    setError(true);
-  };
-
   React.useEffect(() => {
     if (url) {
       const decodedUrl = decodeURIComponent(url as string);
@@ -176,7 +171,6 @@ const VNPayPage = () => {
         ref={webViewRef}
         source={{ uri: decodeURIComponent(url as string) }}
         style={styles.webview}
-        onError={handleWebViewError}
         onNavigationStateChange={handleWebViewNavigationStateChange}
         javaScriptEnabled={true}
         domStorageEnabled={true}
