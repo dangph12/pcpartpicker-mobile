@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -21,6 +22,98 @@ const BuilderPage = () => {
   const { session } = useAuth();
   const [builderData, setBuilderData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [processingPayment, setProcessingPayment] = useState(false);
+
+  const calculateTotalPrice = useCallback(async () => {
+    try {
+      const partIds = Object.values(builderData).filter(Boolean);
+      if (partIds.length === 0) {
+        setTotalPrice(0);
+        return;
+      }
+
+      let total = 0;
+
+      // Fetch prices for each part
+      for (const [partType, partId] of Object.entries(builderData)) {
+        if (partId) {
+          const tableSource = partType.replace('_id', '') as TableSourceKey;
+          const { data, error } = await supabase
+            .from(tableSourceMap[tableSource].table)
+            .select('price')
+            .eq('id', partId)
+            .single();
+
+          if (!error && data?.price) {
+            total += parseFloat(data.price);
+          }
+        }
+      }
+
+      setTotalPrice(total * 100);
+    } catch (error) {
+      console.error('Error calculating total price:', error);
+    }
+  }, [builderData]);
+
+  const handleCheckout = async () => {
+    try {
+      const partIds = Object.values(builderData).filter(Boolean);
+      if (partIds.length === 0) {
+        Alert.alert(
+          'Empty Builder',
+          'Please add some parts to your build before checking out.'
+        );
+        return;
+      }
+
+      if (!session?.user?.id) {
+        Alert.alert(
+          'Authentication Error',
+          'Please log in to continue with payment.'
+        );
+        return;
+      }
+
+      setProcessingPayment(true);
+
+      const { data: paymentData, error: paymentError } =
+        await supabase.functions.invoke('vnpay-create-payment', {
+          body: {
+            amount: totalPrice,
+            language: 'vn',
+            orderInfo: `PC Build Order for ${session?.user.email}`,
+            userId: session?.user.id,
+          },
+        });
+
+      if (paymentError) {
+        throw new Error('Failed to create payment: ' + paymentError.message);
+      }
+
+      if (paymentData?.success && paymentData?.data?.paymentUrl) {
+        router.navigate({
+          pathname: '/payment/vnpay' as any,
+          params: {
+            url: paymentData.data.paymentUrl,
+            orderId: paymentData.data.orderId,
+          },
+        });
+      } else {
+        console.error('Invalid payment response:', paymentData);
+        throw new Error('No payment URL received from VNPay');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      Alert.alert(
+        'Payment Error',
+        error instanceof Error ? error.message : 'Failed to process payment'
+      );
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -74,6 +167,15 @@ const BuilderPage = () => {
         fetchBuilderData();
       }
     }, [session?.user.id])
+  );
+
+  // Calculate total price when builderData changes
+  useFocusEffect(
+    useCallback(() => {
+      if (Object.keys(builderData).length > 0) {
+        calculateTotalPrice();
+      }
+    }, [builderData, calculateTotalPrice])
   );
 
   const handleRemoveFromBuilder = async (partType: string) => {
@@ -131,6 +233,30 @@ const BuilderPage = () => {
           </View>
         );
       })}
+
+      {/* Payment Summary Section */}
+      <View style={styles.summaryContainer}>
+        <Text style={styles.summaryTitle}>Order Summary</Text>
+        <View style={styles.totalRow}>
+          <Text style={styles.totalLabel}>Total:</Text>
+          <Text style={styles.totalPrice}>
+            {totalPrice.toLocaleString('vi-VN')} VND
+          </Text>
+        </View>
+
+        <Button
+          mode="contained"
+          onPress={handleCheckout}
+          disabled={
+            processingPayment ||
+            Object.values(builderData).filter(Boolean).length === 0
+          }
+          loading={processingPayment}
+          style={styles.checkoutButton}
+          contentStyle={styles.checkoutButtonContent}>
+          {processingPayment ? 'Processing...' : 'Proceed to Payment'}
+        </Button>
+      </View>
     </ScrollView>
   );
 };
@@ -164,5 +290,51 @@ const styles = StyleSheet.create({
   },
   addButton: {
     marginTop: 10,
+  },
+  summaryContainer: {
+    marginTop: 20,
+    marginBottom: 20,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  totalLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  totalPrice: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2196F3',
+  },
+  checkoutButton: {
+    marginTop: 10,
+    backgroundColor: '#4CAF50',
+  },
+  checkoutButtonContent: {
+    paddingVertical: 8,
   },
 });
