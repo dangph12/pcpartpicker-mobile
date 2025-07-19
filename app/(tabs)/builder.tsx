@@ -13,11 +13,14 @@ import {
 import { Button } from 'react-native-paper';
 import BuilderItem from '~/components/BuilderItem';
 import { useAuth } from '~/contexts/AuthContext';
-import { supabase } from '~/lib/subpabase';
+import { supabase } from '~/lib/supabase';
 import { removeFromBuilder } from '~/utils/removeFromBuilder';
 import { TableSourceKey, tableSourceMap } from '~/utils/tableSourceUtils';
 
 const BuilderPage = () => {
+  // Rate conversion: 1 USD = 26,160 VND (as of the time of writing)
+  const RATE = 26160;
+
   const router = useRouter();
   const { session } = useAuth();
   const [builderData, setBuilderData] = useState<Record<string, any>>({});
@@ -51,7 +54,7 @@ const BuilderPage = () => {
         }
       }
 
-      setTotalPrice(total * 100);
+      setTotalPrice(total);
     } catch (error) {
       console.error('Error calculating total price:', error);
     }
@@ -112,11 +115,12 @@ const BuilderPage = () => {
         }
       }
 
-      // 3. Call vnpay-create-payment with orderId
+      const totalAmount = Math.round(totalPrice * RATE);
+
       const { data: paymentData, error: paymentError } =
         await supabase.functions.invoke('vnpay-create-payment', {
           body: {
-            amount: totalPrice,
+            amount: totalAmount,
             language: 'vn',
             orderInfo: `PC Build Order for ${session?.user.email}`,
             userId: session?.user.id,
@@ -276,7 +280,18 @@ const BuilderPage = () => {
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Total:</Text>
           <Text style={styles.totalPrice}>
-            {totalPrice.toLocaleString('vi-VN')} VND
+            {totalPrice.toLocaleString('en-US', {
+              style: 'currency',
+              currency: 'USD',
+            })}
+          </Text>
+          <Text style={{ fontSize: 12, color: '#888' }}>
+            (
+            {(totalPrice * RATE).toLocaleString('vi-VN', {
+              style: 'currency',
+              currency: 'VND',
+            })}
+            )
           </Text>
         </View>
 
