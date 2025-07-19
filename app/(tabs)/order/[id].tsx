@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -9,13 +10,16 @@ import {
   View,
 } from 'react-native';
 import { supabase } from '~/lib/supabase';
+import { Order } from '~/types/Order';
+import { OrderItem } from '~/types/OrderItem';
+import Product from '~/types/Product';
 import { tableSourceMap } from '~/utils/tableSourceUtils';
 
 const Page = () => {
   const { id } = useLocalSearchParams();
-  const [order, setOrder] = useState<any>(null);
-  const [items, setItems] = useState<any[]>([]);
-  const [products, setProducts] = useState<Record<string, any>>({});
+  const [order, setOrder] = useState<Order | null>(null);
+  const [items, setItems] = useState<OrderItem[]>([]);
+  const [products, setProducts] = useState<Record<string, Product>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,17 +38,17 @@ const Page = () => {
         setLoading(false);
         return;
       }
-      setOrder(orderData);
+      setOrder(orderData as Order);
 
       const { data: itemsData, error: itemsError } = await supabase
         .from('order_items')
         .select('*')
         .eq('order_id', id);
 
-      setItems(itemsError ? [] : itemsData || []);
+      setItems(itemsError ? [] : (itemsData as OrderItem[]) || []);
 
       // Fetch product data for each item
-      const productsData: Record<string, any> = {};
+      const productsData: Record<string, Product> = {};
       for (const item of itemsData || []) {
         const tableSource = item.part_type;
         const partId = item.part_id;
@@ -55,7 +59,7 @@ const Page = () => {
             .eq('id', partId)
             .single();
           if (!productError && productData) {
-            productsData[item.id] = productData;
+            productsData[item.id] = productData as Product;
           }
         }
       }
