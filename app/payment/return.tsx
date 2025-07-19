@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 import Constants from 'expo-constants';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -185,10 +186,6 @@ const PaymentReturnPage = () => {
     return success ? '#4CAF50' : '#f44336';
   };
 
-  const getStatusIcon = (success: boolean) => {
-    return success ? '✅' : '❌';
-  };
-
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -234,10 +231,7 @@ const PaymentReturnPage = () => {
     <ScrollView style={styles.container}>
       <Card style={styles.resultCard}>
         <Card.Content>
-          <View style={styles.statusHeader}>
-            <Text style={styles.statusIcon}>
-              {getStatusIcon(paymentResult.success)}
-            </Text>
+          <View style={[styles.statusHeader, { marginBottom: 0 }]}>
             <Text
               style={[
                 styles.statusTitle,
@@ -246,33 +240,40 @@ const PaymentReturnPage = () => {
               {paymentResult.success ? 'Payment Successful!' : 'Payment Failed'}
             </Text>
           </View>
-
-          <Text style={styles.statusMessage}>{paymentResult.message}</Text>
-
+          <Text
+            style={[
+              styles.statusMessage,
+              {
+                color: getStatusColor(paymentResult.success),
+                fontWeight: 'bold',
+                fontSize: 18,
+                marginBottom: 8,
+              },
+            ]}>
+            {paymentResult.message}
+          </Text>
           <Divider style={styles.divider} />
-
           <View style={styles.detailsContainer}>
             <Text style={styles.sectionTitle}>Payment Details</Text>
-
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Order ID:</Text>
               <Text style={styles.detailValue}>{paymentResult.orderId}</Text>
             </View>
-
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Amount:</Text>
               <Text style={styles.detailValue}>
-                {paymentResult.amount.toLocaleString('vi-VN')} VND
+                {paymentResult.amount.toLocaleString('vi-VN', {
+                  style: 'currency',
+                  currency: 'VND',
+                })}
               </Text>
             </View>
-
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Response Code:</Text>
               <Text style={styles.detailValue}>
                 {paymentResult.responseCode}
               </Text>
             </View>
-
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Transaction Date:</Text>
               <Text style={styles.detailValue}>
@@ -281,14 +282,12 @@ const PaymentReturnPage = () => {
                 )}
               </Text>
             </View>
-
             {paymentResult.bankCode && (
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>Bank:</Text>
                 <Text style={styles.detailValue}>{paymentResult.bankCode}</Text>
               </View>
             )}
-
             {paymentResult.cardType && (
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>Card Type:</Text>
@@ -298,7 +297,6 @@ const PaymentReturnPage = () => {
           </View>
         </Card.Content>
       </Card>
-
       <View style={styles.actionContainer}>
         {paymentResult.success ? (
           <>
@@ -387,12 +385,9 @@ const styles = StyleSheet.create({
   },
   statusHeader: {
     alignItems: 'center',
-    marginBottom: 16,
-  },
-  statusIcon: {
-    fontSize: 48,
     marginBottom: 8,
   },
+  // statusIcon removed
   statusTitle: {
     fontSize: 24,
     fontWeight: 'bold',
