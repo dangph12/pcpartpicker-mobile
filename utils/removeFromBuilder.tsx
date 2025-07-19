@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unresolved */
-import { supabase } from '~/lib/subpabase';
+import { supabase } from '~/lib/supabase';
 
 export const removeFromBuilder = async (userId: string, partType: string) => {
   const { data: builderData, error: builderError } = await supabase

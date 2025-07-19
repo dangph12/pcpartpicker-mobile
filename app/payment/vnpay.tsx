@@ -18,13 +18,11 @@ const VNPayPage = () => {
   const [error, setError] = useState(false);
   const webViewRef = useRef<WebView>(null);
 
-  // Check if we're on web platform and auto-open in browser
   useEffect(() => {
     if (Platform.OS === 'web' && url) {
       const openInBrowser = async () => {
         try {
           await WebBrowser.openBrowserAsync(decodeURIComponent(url as string));
-          // After opening browser, navigate back or to return page
           router.back();
         } catch (error) {
           setError(true);

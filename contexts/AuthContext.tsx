@@ -7,7 +7,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { supabase } from '~/lib/subpabase';
+import { supabase } from '~/lib/supabase';
 
 interface UserProfile {
   id: string;

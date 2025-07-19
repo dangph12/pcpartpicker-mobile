@@ -3,7 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { Button } from 'react-native-paper';
-import { supabase } from '~/lib/subpabase';
+import { supabase } from '~/lib/supabase';
 
 interface AvatarProps {
   size?: number;

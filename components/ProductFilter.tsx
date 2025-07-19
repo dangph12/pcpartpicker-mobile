@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Button, Checkbox, RadioButton, TextInput } from 'react-native-paper';
 import { z } from 'zod';
-import { supabase } from '~/lib/subpabase';
+import { supabase } from '~/lib/supabase';
 
 // Price ranges
 const PRICE_RANGES = [

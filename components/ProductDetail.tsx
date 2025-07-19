@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Loading from '~/components/Loading';
-import { supabase } from '~/lib/subpabase';
+import { supabase } from '~/lib/supabase';
 import Case from '~/types/Case';
 import Cpu from '~/types/Cpu';
 import CpuCooler from '~/types/CpuCooler';

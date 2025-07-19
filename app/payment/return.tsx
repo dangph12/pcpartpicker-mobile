@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Button, Card, Divider } from 'react-native-paper';
 import { useAuth } from '~/contexts/AuthContext';
-import { supabase } from '~/lib/subpabase';
+import { supabase } from '~/lib/supabase';
 
 interface PaymentResult {
   success: boolean;

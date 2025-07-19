@@ -5,7 +5,7 @@ import { Button } from 'react-native-paper';
 import Loading from '~/components/Loading';
 import Pagination from '~/components/Pagination';
 import ProductFilter, { FilterOptions } from '~/components/ProductFilter';
-import { supabase } from '~/lib/subpabase';
+import { supabase } from '~/lib/supabase';
 import Product from '~/types/Product';
 import ProductItem from './ProductItem';
 import ErrorToast from './toasts/ErrorToast';

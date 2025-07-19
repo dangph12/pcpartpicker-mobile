@@ -1,4 +1,4 @@
-import { supabase } from '~/lib/subpabase';
+import { supabase } from '~/lib/supabase';
 
 export interface CreatePaymentParams {
   orderId: string;

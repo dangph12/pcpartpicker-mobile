@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Button, Card, HelperText, Text, TextInput } from 'react-native-paper';
 import { z } from 'zod';
-import { supabase } from '~/lib/subpabase';
+import { supabase } from '~/lib/supabase';
 import ErrorToast from './toasts/ErrorToast';
 import SuccessToast from './toasts/SuccessToast';
 
