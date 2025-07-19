@@ -50,6 +50,22 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="order/index"
+        options={{
+          title: 'Order',
+          tabBarIcon: ({ color }) => (
+            <FontAwesome size={28} name="shopping-basket" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="order/[id]"
+        options={{
+          href: null,
+          title: 'Order Detail',
+        }}
+      />
     </Tabs>
   );
 }

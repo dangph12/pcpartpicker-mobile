@@ -39,6 +39,14 @@ const CustomDrawerContent = (props: any) => {
           onPress={() => router.push('/builder')}
         />
         <DrawerItem
+          label="Orders"
+          icon={({ color, size }) => (
+            <Ionicons name="list-outline" color={color} size={size} />
+          )}
+          focused={pathname === '/order'}
+          onPress={() => router.push('/order')}
+        />
+        <DrawerItem
           label="Profile"
           icon={({ color, size }) => (
             <Ionicons name="person-outline" color={color} size={size} />
