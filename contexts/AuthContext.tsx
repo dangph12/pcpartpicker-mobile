@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import { Session } from '@supabase/supabase-js';
 import {
   createContext,

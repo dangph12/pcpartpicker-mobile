@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';

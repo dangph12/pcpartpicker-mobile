@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Session } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';

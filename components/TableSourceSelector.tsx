@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import { router } from 'expo-router';
 import React from 'react';
 import {

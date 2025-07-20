@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -50,7 +49,7 @@ const Page = () => {
       // Fetch product data for each item
       const productsData: Record<string, Product> = {};
       for (const item of itemsData || []) {
-        const tableSource = item.part_type;
+        const tableSource = item.part_type as keyof typeof tableSourceMap;
         const partId = item.part_id;
         if (tableSourceMap[tableSource]) {
           const { data: productData, error: productError } = await supabase

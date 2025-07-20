@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import React, { useEffect, useState } from 'react';
 import { FlatList, Modal, StyleSheet, View } from 'react-native';
 import { Button } from 'react-native-paper';

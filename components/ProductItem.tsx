@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity } from 'react-native';

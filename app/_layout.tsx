@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import { Drawer } from 'expo-router/drawer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';

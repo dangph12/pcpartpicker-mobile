@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';

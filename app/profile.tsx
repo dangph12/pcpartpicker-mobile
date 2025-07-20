@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import { ActivityIndicator, View } from 'react-native';
 import 'react-native-url-polyfill/auto';
 import NotAuthorize from '~/components/NotAuthorize';

@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import Constants from 'expo-constants';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';

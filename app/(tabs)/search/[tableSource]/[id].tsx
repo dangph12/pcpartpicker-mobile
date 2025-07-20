@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';

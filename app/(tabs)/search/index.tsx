@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import TableSourceSelector from '~/components/TableSourceSelector';

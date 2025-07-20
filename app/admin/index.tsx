@@ -11,7 +11,6 @@ export default function AdminDashboard() {
 
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>Quick Stats</Text>
-        {/* Add your admin dashboard content here */}
       </View>
     </ScrollView>
   );

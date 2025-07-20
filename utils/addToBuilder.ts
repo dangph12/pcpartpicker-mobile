@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import { supabase } from '~/lib/supabase';
 
 export const addToBuilder = async (

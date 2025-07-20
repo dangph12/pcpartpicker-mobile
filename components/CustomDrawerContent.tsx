@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { router, usePathname } from 'expo-router';
@@ -68,14 +67,6 @@ const CustomDrawerContent = (props: any) => {
             )}
             focused={pathname === '/admin'}
             onPress={() => router.push('/admin')}
-          />
-          <DrawerItem
-            label="Admin Users"
-            icon={({ color, size }) => (
-              <Ionicons name="people-outline" color={color} size={size} />
-            )}
-            focused={pathname === '/admin/users'}
-            onPress={() => router.push('/admin/users')}
           />
         </Drawer.Section>
       )}

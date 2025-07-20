@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
