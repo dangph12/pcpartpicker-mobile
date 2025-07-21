@@ -47,7 +47,7 @@ const AdminOrderPage = () => {
   const handleStatusChange = async (orderId: number, newStatus: string) => {
     setLoading(true);
     await supabase
-      .from('order')
+      .from('orders') // <-- changed from 'order' to 'orders'
       .update({ status: newStatus })
       .eq('id', orderId);
     // Refresh orders
