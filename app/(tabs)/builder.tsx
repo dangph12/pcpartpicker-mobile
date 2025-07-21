@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Button } from 'react-native-paper';
 import BuilderItem from '~/components/BuilderItem';
+import NotAuthorize from '~/components/NotAuthorize';
 import { useAuth } from '~/contexts/AuthContext';
 import { supabase } from '~/lib/supabase';
 import { removeFromBuilder } from '~/utils/removeFromBuilder';
@@ -240,6 +241,10 @@ const BuilderPage = () => {
         <Text>Loading builder data...</Text>
       </View>
     );
+  }
+
+  if (!session) {
+    return <NotAuthorize />;
   }
 
   return (

@@ -50,7 +50,7 @@ const AdminProfilePage = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} horizontal>
       <View style={styles.table}>
         <View style={[styles.tableRow, styles.tableHeader]}>
           <Text style={[styles.tableCell, styles.headerCell]}>User ID</Text>

@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { DrawerToggleButton } from '@react-navigation/drawer';
 import { Tabs } from 'expo-router';
 
@@ -19,21 +20,41 @@ export default function AdminLayout() {
         name="index"
         options={{
           title: 'Dashboard',
-          tabBarLabel: 'Dashboard',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="home-outline" color={color} size={28} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="profile/[id]"
+        name="profile/index"
         options={{
           title: 'Profile',
-          tabBarLabel: 'Profile',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="person-outline" color={color} size={28} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="order/index"
+        options={{
+          title: 'Orders',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="list-outline" color={color} size={28} />
+          ),
         }}
       />
       <Tabs.Screen
         name="order/[id]"
         options={{
-          title: 'Order',
-          tabBarLabel: 'Order',
+          href: null,
+          title: 'Order Detail',
+        }}
+      />
+      <Tabs.Screen
+        name="profile/[id]"
+        options={{
+          href: null,
+          title: 'Profile Detail',
         }}
       />
     </Tabs>

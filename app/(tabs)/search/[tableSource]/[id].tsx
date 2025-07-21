@@ -65,5 +65,6 @@ const styles = StyleSheet.create({
   },
   addButton: {
     elevation: 5,
+    borderRadius: 50,
   },
 });

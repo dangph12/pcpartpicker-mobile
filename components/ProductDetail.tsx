@@ -136,6 +136,7 @@ const ProductDetail = ({
         <Text style={styles.specsTitle}>Specifications</Text>
         {renderProductSpecs()}
       </View>
+      <View style={{ height: 50 }} />
     </ScrollView>
   );
 };
